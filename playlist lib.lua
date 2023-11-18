@@ -113,6 +113,14 @@ else
             },{enviorment or {}}),{ply})
         end)
 
-        netSend(data)
+        if !data then
+            http.get("https://github.com/Elias-bff/Playlist-SF-LIB/raw/main/playlist.txt",function(packet)
+                print(Color(255,0,0),"[Playlist.txt: 404]",Color(255,255,255),": Loading online playlist.")
+                
+                netSend(bit.stringToTable(packet))
+            end)
+        else
+            netSend(data)
+        end
     end
 end
