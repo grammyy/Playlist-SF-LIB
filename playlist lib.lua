@@ -44,8 +44,6 @@ if SERVER then
             net.writeEntity(ply)
             net.send(owner(),false)
         end)
-        
-        print("new client")
     end)
 else
     data={}
