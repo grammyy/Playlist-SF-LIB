@@ -39,11 +39,13 @@ if SERVER then
             return
         end
         
-        queue(1/2,function()
+        queue(1/3,function()
             net.start("cl_request")
             net.writeEntity(ply)
             net.send(owner(),false)
         end)
+        
+        print("new client")
     end)
 else
     data={}
@@ -55,25 +57,29 @@ else
     end
     
     net.receive("cl_sync",function()
-        for key,packet in pairs(net.readTable()) do
-            data[key]=packet
+        local packet=net.readTable()
+        
+        for key,keyData in pairs(packet) do
+            data[key]=keyData
 
             if key=="songs" then
-                printConsole(Color(0,255,0),"[Initialized]",Color(255,255,255),": Loaded "..#packet.." songs.")
+                printConsole(Color(0,255,0),"[Initialized]",Color(255,255,255),": Loaded "..#keyData.." songs.")
             end
             
             if key=="song" then
-                bass.loadURL(packet.url,"3d noblock",function(snd,_,err)
+                bass.loadURL(keyData.url,"3d noblock",function(snd,_,err)
                     if data.snd then
                         data.snd:stop()
                         
                         hook.remove("think","cl_snd")
+                        timer.remove(data.song.url)
                     end
                     
                     if snd then
                         data.snd=snd
                         data.length=data.snd:getLength()
                         
+                        data.snd:setVolume(keyData.volume or 1)
                         data.snd:play()
 
                         hook.add("think","cl_snd",function()
@@ -86,7 +92,7 @@ else
                             end
                         end)
                         
-                        timer.simple(data.length,function()
+                        timer.create(keyData.url,data.length,1,function()
                             hook.remove("think","cl_snd")
                         end)
                     else
@@ -96,7 +102,7 @@ else
             end
             
             if key=="time" and data.snd then
-                data.snd:setTime(packet)
+                data.snd:setTime(keyData)
             end
         end
     end)
@@ -123,4 +129,20 @@ else
             netSend(data)
         end
     end
+    
+    hook.add("PlayerChat","cl_add",function(ply,text)
+        local packet=string.split(text," ")
+        
+        if packet[1]=="!request" then
+            netSend({
+                song={
+                    url=packet[2],
+                    title=packet[3],
+                    author=packet[4],
+                    time=packet[5],
+                    volume=0.5
+                },
+            })
+        end
+    end)
 end
