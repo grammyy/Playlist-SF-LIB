@@ -118,7 +118,7 @@ else
         end)
 
         if !data then
-            http.get("https://github.com/Elias-bff/Playlist-SF-LIB/raw/main/playlist.txt",function(packet)
+            http.get("https://github.com/grammyy/Playlist-SF-LIB/raw/main/playlist.txt",function(packet)
                 print(Color(255,0,0),"[Playlist.txt: 404]",Color(255,255,255),": Loading online playlist.")
                 
                 netSend(bit.stringToTable(packet))
